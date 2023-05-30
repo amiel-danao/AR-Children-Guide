@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1026706295394",
+    "project_id": "mobile-ar-6984e",
+    "storage_bucket": "mobile-ar-6984e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026706295394:android:3ad5cdc7721eda7e689f3b",
+        "android_client_info": {
+          "package_name": "com.example.ar_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026706295394-8gc80ktrd6oafppaqv4dnesuv3mj7i2u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo11FwX2vhF5c3UQvn-wNkUbOLsYyTs9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026706295394-8gc80ktrd6oafppaqv4dnesuv3mj7i2u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
