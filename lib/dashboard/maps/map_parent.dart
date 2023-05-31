@@ -83,7 +83,7 @@ class _MapViewParentState extends State<MapViewParent> {
     childrenLocation = await Parent().getChildLocation(widget.childID);
 
     CameraPosition newPosition =
-        CameraPosition(zoom: 19, target: childrenLocation!);
+        CameraPosition(zoom: 14.4746, target: childrenLocation!);
     controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
 
     if (!mounted) {
@@ -106,7 +106,7 @@ class _MapViewParentState extends State<MapViewParent> {
       return;
     }
     CameraPosition newPosition = CameraPosition(
-        zoom: 19,
+        zoom: 14.4746,
         target:
             LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
     controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
@@ -145,7 +145,7 @@ class _MapViewParentState extends State<MapViewParent> {
   Future<void> showStreetView(String lat, String lng) async {
     GoogleMapController controller = await _controller.future;
     CameraPosition newPosition = CameraPosition(
-      zoom: 24,
+      zoom: 14.4746,
       target: LatLng(
         double.parse(lat),
         double.parse(lng),
@@ -362,7 +362,7 @@ class _MapViewParentState extends State<MapViewParent> {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: startPosition, zoom: 12),
+        CameraPosition(target: startPosition, zoom: 14.4746),
       ),
     );
 

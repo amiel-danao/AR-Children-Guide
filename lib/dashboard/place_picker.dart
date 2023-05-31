@@ -85,7 +85,7 @@ class _PlacePickerState extends State<PlacePicker> {
       return;
     }
     CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(
-        CameraPosition(target: targetPosition!, zoom: 15));
+        CameraPosition(target: targetPosition!, zoom: 14.4746));
     controller!.animateCamera(cameraUpdate);
     print(targetPosition);
     Marker marker = Marker(
@@ -107,9 +107,9 @@ class _PlacePickerState extends State<PlacePicker> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: CameraPosition(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(37.422, -122.084),
-              zoom: 17.0,
+              zoom: 14.4746,
             ),
             onTap: _selectLocation,
             markers: markers,

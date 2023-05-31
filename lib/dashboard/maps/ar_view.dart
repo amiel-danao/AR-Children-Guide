@@ -44,7 +44,8 @@ class _ARViewState extends State<ARView> {
   var cameraIndex = 0;
   double compassAngle = 0;
   double directionAngle = 0;
-  final Completer<GoogleMapController> _controller = Completer();
+  // final Completer<GoogleMapController> _controller = Completer();
+  late GoogleMapController googleMapController;
   final Set<Marker> _markers = <Marker>{};
   final Set<Polygon> _polygons = <Polygon>{};
   BitmapDescriptor? customMarkerIcon;
@@ -54,7 +55,7 @@ class _ARViewState extends State<ARView> {
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 20,
+    zoom: 24,
   );
 
   static Future<void> callback() async {
@@ -102,7 +103,7 @@ class _ARViewState extends State<ARView> {
     }
 
     var directions = await LocationService().getDirections(
-      currentLocation,
+      GeoPoint(currentLocation!.latitude, currentLocation!.longitude),
       end,
     );
     if (directions == null) {
@@ -147,6 +148,9 @@ class _ARViewState extends State<ARView> {
         callback();
       });
     });
+  }
+
+  void initializeEverything(){
     initializeCameraController();
     getCurrentLocation();
     timer = Timer.periodic(
@@ -159,7 +163,7 @@ class _ARViewState extends State<ARView> {
       }
     });
     BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(48, 48)), 'assets/marker.png')
+        ImageConfiguration(size: Size(48, 48)), 'assets/marker.png')
         .then((onValue) {
       if (!mounted) {
         return;
@@ -191,22 +195,23 @@ class _ARViewState extends State<ARView> {
             widget.endDestination.longitude);
       });
     }
-    moveToLocation();
+    await moveToLocation();
     plotJourney();
   }
 
   Future<void> moveToLocation() async {
-    GoogleMapController controller = await _controller.future;
+    // GoogleMapController controller = await _controller.future;
     if (currentLocation == null) {
       return;
     }
     try {
+      double zoomLevel = await googleMapController.getZoomLevel();
       CameraPosition newPosition = CameraPosition(
           bearing: compassAngle + 180,
-          zoom: await controller.getZoomLevel(),
+          zoom: zoomLevel,
           target:
               LatLng(currentLocation!.latitude, currentLocation!.longitude));
-      controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
+      googleMapController.animateCamera(CameraUpdate.newCameraPosition(newPosition));
       if (mounted) {
         setState(() {
           _markers.add(createMarker("currentLocation", "Your Current Location",
@@ -259,15 +264,15 @@ class _ARViewState extends State<ARView> {
   }
 
   Future<void> showStreetView(String lat, String lng) async {
-    GoogleMapController controller = await _controller.future;
+    // GoogleMapController controller = await _controller.future;
     CameraPosition newPosition = CameraPosition(
-      zoom: 24,
+      zoom: await googleMapController.getZoomLevel(),
       target: LatLng(
         double.parse(lat),
         double.parse(lng),
       ),
     );
-    await controller.animateCamera(
+    await googleMapController.animateCamera(
       CameraUpdate.newCameraPosition(newPosition),
     );
     StreetViewer.showStreetView(
@@ -279,13 +284,15 @@ class _ARViewState extends State<ARView> {
   }
 
   Future<void> initializeCameraController() async {
-    controller = CameraController(cameras[0], ResolutionPreset.max);
-    cameraIndex = 0;
-    controller!.initialize().then((_) {
+    setState(() {
+      controller = CameraController(cameras[0], ResolutionPreset.max);
+      cameraIndex = 0;
+    });
+
+    await controller!.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      setState(() {});
     }).catchError((Object e) {
       if (e is CameraException) {
         switch (e.code) {
@@ -357,8 +364,15 @@ class _ARViewState extends State<ARView> {
                 polygons: _polygons,
                 polylines: polylines,
                 initialCameraPosition: _kGooglePlex,
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
+                minMaxZoomPreference: const MinMaxZoomPreference(14, 24),
+                onMapCreated: (GoogleMapController controller) async {
+                  setState(() {
+                    googleMapController = controller;
+                  });
+
+                  initializeEverything();
+
+                  // _controller.complete(controller);
                 },
               ),
             ),

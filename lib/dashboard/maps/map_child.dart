@@ -104,33 +104,13 @@ class _MapViewChildrenState extends State<MapViewChildren> {
       return;
     }
     CameraPosition newPosition = CameraPosition(
-        zoom: 19,
+        zoom: await controller.getZoomLevel(),
         target:
             LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
     controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
   }
 
   Future<void> getLocation() async {
-    // const androidConfig = FlutterBackgroundAndroidConfig(
-    //     notificationTitle: "Tracking location",
-    //     notificationText: "Tracking location is running on background",
-    //     notificationImportance: AndroidNotificationImportance.Max,
-    //     enableWifiLock: true);
-    // bool initialized =
-    //     await FlutterBackground.initialize(androidConfig: androidConfig);
-    // bool hasPermissions = await FlutterBackground.hasPermissions;
-    // bool enabled = FlutterBackground.isBackgroundExecutionEnabled;
-    // if (hasPermissions && initialized && !enabled) {
-    //   await FlutterBackground.enableBackgroundExecution();
-    //   Fluttertoast.showToast(
-    //       msg: "Background execution enabled",
-    //       toastLength: Toast.LENGTH_SHORT,
-    //       gravity: ToastGravity.BOTTOM,
-    //       timeInSecForIosWeb: 1,
-    //       backgroundColor: Colors.red,
-    //       textColor: Colors.white,
-    //       fontSize: 16.0);
-    // }
     LocationData currentLocationAwait =
         await MapFunctions().getCurrentLocation();
 
@@ -218,7 +198,7 @@ class _MapViewChildrenState extends State<MapViewChildren> {
   Future<void> showStreetView(String lat, String lng) async {
     GoogleMapController controller = await _controller.future;
     CameraPosition newPosition = CameraPosition(
-      zoom: 24,
+      zoom: await controller.getZoomLevel(),
       target: LatLng(
         double.parse(lat),
         double.parse(lng),
@@ -416,7 +396,7 @@ class _MapViewChildrenState extends State<MapViewChildren> {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: startPosition, zoom: 12),
+        CameraPosition(target: startPosition, zoom: 14.4746),
       ),
     );
     print("he");
