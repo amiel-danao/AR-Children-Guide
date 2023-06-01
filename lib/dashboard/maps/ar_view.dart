@@ -14,22 +14,27 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' hide LocationAccuracy;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
+import '../../auth/auth.dart';
+import '../../auth/profiles/child.dart';
 import '../../main.dart';
 import 'package:vector_math/vector_math_64.dart' show radians, degrees;
 
+import '../../models/ChildNotification.dart';
 import '../../widget_builder.dart';
 import 'location_service.dart';
 
 class ARView extends StatefulWidget {
+
   const ARView(
       {super.key,
       required this.startDestination,
       required this.endDestination,
       required this.endLocation,
-      required this.polylines});
+      required this.polylines,
+      required this.journeyId});
   final LatLng startDestination;
   final LatLng endDestination;
-
+  final String journeyId;
   final GeoPoint? endLocation;
   final Set<Polyline> polylines;
 
@@ -144,7 +149,7 @@ class _ARViewState extends State<ARView> {
       AndroidAlarmManager.periodic(const Duration(minutes: 1), 0, callback,
               wakeup: true)
           .then((value) {
-        print(value);
+        print('value: $value');
         callback();
       });
     });
@@ -224,6 +229,13 @@ class _ARViewState extends State<ARView> {
       }
       _setMarker(widget.startDestination, "startlocation");
       _setMarker(widget.endDestination, "endlocation");
+
+      final distance =
+      calculateDistance(currentLocation!.latitude, currentLocation!.longitude, widget.endDestination.latitude, widget.endDestination.longitude);
+      if(distance <= 2) {
+        sendArriveNotification();
+      }
+      print('distance: $distance');
     } catch (e) {
       return;
     }
@@ -380,5 +392,34 @@ class _ARViewState extends State<ARView> {
         ],
       ),
     );
+  }
+
+  Future<void> sendArriveNotification() async {
+    final uid = Auth().currentUser!.uid;
+    DocumentReference documentRef = FirebaseFirestore.instance.collection('Notifications').doc(widget.journeyId);
+
+    DocumentSnapshot documentSnapshot = await documentRef.get();
+
+    if (documentSnapshot.exists) {
+      print('Document exists');
+    } else {
+      print('Document does not exist');
+
+      var profile = await Child().getProfile();
+
+      var parentId = profile['parentId']??"";
+
+      ChildNotification childNotification = ChildNotification(
+        uid: uid,
+        username: profile['username'],
+        parentId: parentId,
+        dateNotified: Timestamp.now(), // Replace with your desired timestamp
+        viewed: false
+      );
+
+      CollectionReference notificationsCollection = FirebaseFirestore.instance.collection('Notifications');
+      await notificationsCollection.doc(widget.journeyId).set(childNotification.toMap());
+
+    }
   }
 }

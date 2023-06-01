@@ -103,7 +103,8 @@ class _ChildDashboardPageState extends State<ChildDashboardPage> {
                             startDestination: journeyList[index]["from"].toString(),
                             endDestination: journeyList[index]["to"].toString(),
                             startLocation: journeyList[index]["startLocation"],
-                            endLocation: journeyList[index]["endLocation"]
+                            endLocation: journeyList[index]["endLocation"],
+                            journeyId: journeyList[index]["id"],
                           ),
                         ),
                       );

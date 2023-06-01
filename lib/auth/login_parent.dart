@@ -1,4 +1,6 @@
 import 'package:ar/auth/forgot_password.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -232,6 +234,7 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                         email: emailController.text,
                                         password: passwordController.text);
                                 if (result == "Success") {
+                                  updateFCMToken();
                                   Fluttertoast.showToast(
                                       msg: "Login success",
                                       toastLength: Toast.LENGTH_SHORT,
@@ -267,5 +270,14 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
         ],
       ),
     );
+  }
+
+  Future<void> updateFCMToken() async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    var data = {
+      "token": fcmToken
+    };
+
+    await FirebaseFirestore.instance.collection("Tokens").doc(Auth().currentUser!.uid).set(data);
   }
 }

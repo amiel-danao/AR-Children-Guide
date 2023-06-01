@@ -23,11 +23,12 @@ class MapViewChildren extends StatefulWidget {
   final String endDestination;
   final GeoPoint? startLocation;
   final GeoPoint? endLocation;
+  final String journeyId;
 
   const MapViewChildren(
       {super.key,
       required this.startDestination,
-      required this.endDestination, this.startLocation, this.endLocation});
+      required this.endDestination, this.startLocation, this.endLocation, required this.journeyId});
 
   @override
   State<MapViewChildren> createState() => _MapViewChildrenState();
@@ -340,6 +341,7 @@ class _MapViewChildrenState extends State<MapViewChildren> {
           endDestination: destinationPosition!,
           endLocation: widget.endLocation,
           polylines: _polylines,
+          journeyId: widget.journeyId,
         ),
       ),
     );

@@ -132,6 +132,7 @@ class Parent extends Profile {
         "email": child.email,
         "password": password,
         "uid": child.uid,
+        "parentId": user!.uid
       };
       await Database().setDocumentData(path, data);
       await Database().setDocumentData(path, info);
