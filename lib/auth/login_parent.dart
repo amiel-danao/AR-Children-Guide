@@ -234,7 +234,7 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                         email: emailController.text,
                                         password: passwordController.text);
                                 if (result == "Success") {
-                                  updateFCMToken();
+                                  await updateFCMToken();
                                   Fluttertoast.showToast(
                                       msg: "Login success",
                                       toastLength: Toast.LENGTH_SHORT,
