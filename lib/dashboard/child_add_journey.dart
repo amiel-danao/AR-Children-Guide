@@ -253,7 +253,7 @@ class _JourneyFormState extends State<JourneyForm> {
                       "startLocation": startLocation,
                       "endLocation": endLocation
                     };
-                    Child().addJourney(journey).then((value) {
+                    await Child().addJourney(journey).then((value) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content:
                               Text("Wait for few seconds to see changes")));

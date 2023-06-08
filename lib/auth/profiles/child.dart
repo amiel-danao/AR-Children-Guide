@@ -18,6 +18,7 @@ class Child extends Profile {
     DocumentSnapshot<Map<String, dynamic>> profileSnapshot =
         await Database().getDocumentSnapshot(path);
     Map<String, dynamic> profileData = profileSnapshot.data()!;
+    profileData["uid"] = profileSnapshot.id;
     return profileData;
   }
 

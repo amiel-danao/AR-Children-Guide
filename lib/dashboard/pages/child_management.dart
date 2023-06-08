@@ -50,26 +50,23 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Options'),
+          title: Text('Changes Made'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('What would you like to do?'),
+                Text('Are you sure you want to delete this child?'),
               ],
             ),
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text('View'),
+              child: Text('Cancel'),
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ChildViewPage(uid: uid)));
+                Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Delete'),
+              child: Text('Confirm'),
               onPressed: () async {
                 bool creationSucceeded = await Parent()
                     .deleteChildAccount(email, password, userPath, parentPath);
@@ -87,13 +84,6 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
                 Navigator.pushNamed(context, "/dashboard/child_management");
-              },
-            ),
-            ElevatedButton(
-              child: Text('Cancel'),
-              onPressed: () async {
-                // Code to delete the document goes here
-                Navigator.of(context).pop();
               },
             ),
           ],
@@ -115,14 +105,10 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
             Map<String, dynamic> child = childList[index];
             return ListTile(
                 onTap: () {
-                  showViewDeleteDialog(
-                    context,
-                    child["uid"],
-                    child["email"],
-                    child["password"],
-                    "users/child/list/${child["uid"]}",
-                    "users/parent/list/${Parent().user!.email}/children/${child["username"]}",
-                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ChildViewPage(uid: child["uid"])));
                 },
                 leading: Stack(
                   children: [
@@ -134,7 +120,17 @@ class _ChildManagementPageState extends State<ChildManagementPage> {
                     ),
                   ],
                 ),
-                trailing: Text(
+                trailing: IconButton(icon: const Icon(Icons.delete) , onPressed: (){
+                  showViewDeleteDialog(
+                    context,
+                    child["uid"],
+                    child["email"],
+                    child["password"],
+                    "users/child/list/${child["uid"]}",
+                    "users/parent/list/${Parent().user!.email}/children/${child["username"]}",
+                  );
+                }),
+                subtitle: Text(
                   child["email"],
                   style: const TextStyle(color: Colors.green, fontSize: 15),
                 ),

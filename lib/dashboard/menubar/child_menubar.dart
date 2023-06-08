@@ -53,16 +53,23 @@ class _ChildMenuBarState extends State<ChildMenuBar> {
   Future<void> getData() async {
     String path = "profiles/" + Child().user!.uid;
     final ref = FirebaseStorage.instance.ref().child(path);
-    Uint8List? data = await ref.getData();
+    Uint8List? data;
+    try {
+      data = await ref.getData();
+    } catch (e) {}
     if (data == null || data.isEmpty) {
-      photoUrl = null;
+      setState(() {
+        photoUrl = null;
+      });
     } else {
-      photoUrl = await ref.getDownloadURL();
+      setState(() async {
+        photoUrl = await ref.getDownloadURL();
+      });
     }
+
     if (!mounted) {
       return;
     }
-    setState(() {});
   }
 
   @override
@@ -89,6 +96,13 @@ class _ChildMenuBarState extends State<ChildMenuBar> {
               accountEmail: Text(Child().user!.email.toString())),
           Column(
             children: [
+              ListTile(
+                title: const Text("Dashboard"),
+                onTap: () async {
+                  Navigator.pushNamed(context, "/dashboard_child");
+
+                },
+              ),
               ListTile(
                 title: const Text("View Profile"),
                 onTap: () async {

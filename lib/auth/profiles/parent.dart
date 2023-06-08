@@ -165,12 +165,24 @@ class Parent extends Profile {
 
   Future<List<Map<String, dynamic>>> getChildJourneys(String uid) async {
     String path = "users/child/list/$uid/journeys";
+    // List<QueryDocumentSnapshot<Map<String, dynamic>>> collectionList =
+    //     await Database().getDocs(path);
+
+
+    CollectionReference<Map<String, dynamic>> collectionReference =
+    Database().getCollection(path);
+    QuerySnapshot<Map<String, dynamic>> collectionQuerySnapshot =
+    await collectionReference.orderBy("created_at", descending:true).get();
+
     List<QueryDocumentSnapshot<Map<String, dynamic>>> collectionList =
-        await Database().getDocs(path);
+        collectionQuerySnapshot.docs;
+
 
     List<Map<String, dynamic>> journeyList = [];
     await Future.forEach(collectionList, (journeySnapshot) {
-      journeyList.add(journeySnapshot.data());
+      var journeyData = journeySnapshot.data();
+      journeyData['uid'] = journeySnapshot.id;
+      journeyList.add(journeyData);
     });
     return journeyList;
   }

@@ -25,6 +25,7 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isParent = false;
+  bool isAdmin = false;
 
   void showAlert(BuildContext context, String message) {
     showDialog(
@@ -141,7 +142,9 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                       createInput(context, 300, "Email",
                                           controller: emailController,
                                           color: Colors.white,
-                                          onChanged: (email) async {
+
+                                          onChanged:
+                                              (email) async {
                                         print("changing");
                                         if (!emailValidationExpression
                                             .hasMatch(email)) {
@@ -154,7 +157,17 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                         setState(() {
                                           isParent = isParentAwait;
                                         });
-                                      }, validator: (email) {
+
+                                        if(!isParent){
+                                          bool isAdminAwait = await Auth()
+                                              .checkIfAdmin(
+                                              emailController.text);
+                                          setState(() {
+                                            isAdmin = isAdminAwait;
+                                          });
+                                        }
+                                      },
+                                          validator: (email) {
                                         if (email == null) {
                                           return null;
                                         }
@@ -165,9 +178,15 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                         if (email.isEmpty) {
                                           return '\u26A0 Email is empty.';
                                         }
+
+                                        if(isAdmin) {
+                                          return null;
+                                        }
+
                                         if (!isParent) {
                                           checkCredentials(
                                               emailController.text);
+
                                           return 'You are not a parent or is still being verified, try again after few seconds';
                                         }
                                         return null;
@@ -228,7 +247,8 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
                                 }
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                prefs.setString("userType", "parent");
+                                prefs.setString("userType", isAdmin?"admin": "parent");
+
                                 String result = await Auth()
                                     .signInWithEmailAndPassword(
                                         email: emailController.text,
@@ -279,5 +299,12 @@ class _ParentLoginPageState extends State<ParentLoginPage> {
     };
 
     await FirebaseFirestore.instance.collection("Tokens").doc(Auth().currentUser!.uid).set(data);
+  }
+
+  Future checkIfAdmin(String email) async{
+    var admin = await Auth().checkIfAdmin(email);
+    setState(() {
+      isAdmin = admin;
+    });
   }
 }

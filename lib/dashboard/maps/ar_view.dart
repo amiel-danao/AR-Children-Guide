@@ -155,9 +155,9 @@ class _ARViewState extends State<ARView> {
     });
   }
 
-  void initializeEverything(){
-    initializeCameraController();
-    getCurrentLocation();
+  Future<void> initializeEverything() async {
+    await initializeCameraController();
+    await getCurrentLocation();
     timer = Timer.periodic(
         const Duration(seconds: 1), (timer) => getCurrentLocation());
     FlutterCompass.events!.listen((event) {
@@ -168,7 +168,7 @@ class _ARViewState extends State<ARView> {
       }
     });
     BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(48, 48)), 'assets/marker.png')
+        const ImageConfiguration(size: Size(48, 48)), 'assets/marker.png')
         .then((onValue) {
       if (!mounted) {
         return;

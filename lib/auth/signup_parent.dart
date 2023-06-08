@@ -286,7 +286,8 @@ class _ParentSignUpPageState extends State<ParentSignUpPage> {
                   ),
                   TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(
+                            context, "/login_parent");
                       },
                       child: const Text("Have an account? Login")),
                 ],

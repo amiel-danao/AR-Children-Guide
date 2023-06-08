@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../auth/profiles/parent.dart';
+import '../../flutter_flow/flutter_flow_theme.dart';
 import '../../widget_builder.dart';
 
 class CreateChildPage extends StatefulWidget {
@@ -91,143 +92,170 @@ class _CreateChildPageState extends State<CreateChildPage> {
   }
 
   Widget displayForm(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          createInput(context, 300, "Nickname", controller: nicknameController),
-          SizedBox(
-            width: 300,
-            child: PasswordField(
-                hintText: "Password", controller: passwordController),
+    return
+      Stack(children: [
+        Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/background.png'),
+              fit: BoxFit.cover,
+            ),
           ),
-          createInput(context, 300, "Age", controller: ageController),
-          createInput(context, 300, "Phone Number",
-              controller: phoneNumberController),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Region: ",
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              AddressDropdown(
-                values: regionList,
-                type: "region",
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Province: ",
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              AddressDropdown(
-                values: provinceList,
-                type: "province",
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "City: ",
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              AddressDropdown(
-                values: cityList,
-                type: "city",
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Birthday: ",
-                style: TextStyle(fontSize: 20),
-              ),
-              Text(
-                birthDate == null
-                    ? "Not set"
-                    : birthDate.toString().split(" ")[0],
-                style: const TextStyle(fontSize: 20),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              SizedBox(
-                  width: 50,
-                  child: ElevatedButton(
-                      onPressed: pickDate,
-                      child: const Icon(
-                        Icons.edit,
-                        size: 20,
-                      ))),
-            ],
-          ),
-          actionButton(
-            context,
-            "Create",
-            onPressed: () async {
-              Fluttertoast.showToast(
-                  msg: "Creating account",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
-              setState(() {
-                setting = true;
-              });
-              final prefs = await SharedPreferences.getInstance();
-              String region = prefs.getString("region")!;
-              String province = prefs.getString("province")!;
-              String city = prefs.getString("city")!;
-              var data = {
-                "age": ageController.text,
-                "phoneNumber": phoneNumberController.text,
-                "password": passwordController.text,
-                "birthdate": birthDate.toString().split(" ")[0],
-                "address": {
-                  "region": region,
-                  "province": province,
-                  "city": city,
-                },
-              };
-              bool creationSucceeded = await Parent().createChild(
-                  nicknameController.text, passwordController.text, data);
-              print(creationSucceeded);
-              if (creationSucceeded) {
-                if (!mounted) {
-                  return;
-                }
-                Navigator.pop(context);
-                Navigator.pop(context);
-                Navigator.pushNamed(context, "/dashboard/child_management");
-              } else {
-                setState(() {
-                  setting = false;
-                });
-              }
-            },
-          ),
-        ],
-      )),
-    );
+        ),
+
+        Center(
+
+          child:
+
+              Container(
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                ),
+              child:
+          SingleChildScrollView(
+
+              child:
+
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  createInput(context, 300, "Nickname", controller: nicknameController),
+                  SizedBox(
+                    width: 300,
+                    child: PasswordField(
+                        hintText: "Password", controller: passwordController),
+                  ),
+                  createInput(context, 300, "Age", controller: ageController),
+                  createInput(context, 300, "Phone Number",
+                      controller: phoneNumberController),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Region: ",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      AddressDropdown(
+                        values: regionList,
+                        type: "region",
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Province: ",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      AddressDropdown(
+                        values: provinceList,
+                        type: "province",
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "City: ",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      AddressDropdown(
+                        values: cityList,
+                        type: "city",
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Birthday: ",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Text(
+                        birthDate == null
+                            ? "Not set"
+                            : birthDate.toString().split(" ")[0],
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      SizedBox(
+                          width: 50,
+                          child: ElevatedButton(
+                              onPressed: pickDate,
+                              child: const Icon(
+                                Icons.edit,
+                                size: 20,
+                              ))),
+                    ],
+                  ),
+                  actionButton(
+                    context,
+                    "Register",
+                    onPressed: () async {
+                      Fluttertoast.showToast(
+                          msg: "Creating account",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
+                      setState(() {
+                        setting = true;
+                      });
+                      final prefs = await SharedPreferences.getInstance();
+                      String region = prefs.getString("region")!;
+                      String province = prefs.getString("province")!;
+                      String city = prefs.getString("city")!;
+                      var data = {
+                        "age": ageController.text,
+                        "phoneNumber": phoneNumberController.text,
+                        "password": passwordController.text,
+                        "birthdate": birthDate.toString().split(" ")[0],
+                        "address": {
+                          "region": region,
+                          "province": province,
+                          "city": city,
+                        },
+                      };
+                      bool creationSucceeded = await Parent().createChild(
+                          nicknameController.text, passwordController.text, data);
+                      print(creationSucceeded);
+                      if (creationSucceeded) {
+                        if (!mounted) {
+                          return;
+                        }
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, "/dashboard/child_management");
+                      } else {
+                        setState(() {
+                          setting = false;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              )),
+              )
+
+
+        )
+      ],);
   }
 }

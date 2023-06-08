@@ -9,6 +9,7 @@ import 'package:location/location.dart';
 import '../../auth/profiles/parent.dart';
 import '../../widget_builder.dart';
 import 'location_service.dart';
+import 'map_child.dart';
 import 'maps.dart';
 
 class MapViewParent extends StatefulWidget {
@@ -68,6 +69,8 @@ class _MapViewParentState extends State<MapViewParent> {
     super.initState();
     timer =
         Timer.periodic(const Duration(seconds: 60), (Timer t) => getLocation());
+
+
   }
 
   @override
@@ -111,13 +114,17 @@ class _MapViewParentState extends State<MapViewParent> {
             LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
     controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
     if (mounted) {
+      var icon = await BitmapDescriptorHelper.getBitmapDescriptorFromSvgAsset(
+          "assets/images/parent_icon.svg");
+
       setState(() {
         _markers.add(createMarker("currentLocation", "Your Current Location",
             LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
             onTap: () {
           showCustomMarkerDialog(
               LatLng(currentLocation!.latitude!, currentLocation!.longitude!));
-        }));
+        }, icon: icon)
+        );
       });
     }
   }
@@ -172,10 +179,13 @@ class _MapViewParentState extends State<MapViewParent> {
     currentLocation = currentLocationAwait;
     LatLng latLng =
         LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+    var icon = await BitmapDescriptorHelper.getBitmapDescriptorFromSvgAsset(
+        "assets/images/parent_icon.svg");
 
     setState(() {
       _markers.add(
-          createMarker("currentLocation", "Your Current Location", latLng));
+
+          createMarker("currentLocation", "Your Current Location", latLng, icon: icon));
     });
   }
 
@@ -259,8 +269,10 @@ class _MapViewParentState extends State<MapViewParent> {
                 polygons: _polygons,
                 polylines: _polylines,
                 initialCameraPosition: _kGooglePlex,
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (GoogleMapController controller) async {
                   _controller.complete(controller);
+                  await moveToChildren();
+                  plotJourney();
                 },
               ),
               Positioned(
@@ -269,40 +281,48 @@ class _MapViewParentState extends State<MapViewParent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: moveToChildren,
-                          child: Stack(children: [
-                            Icon(Icons.child_care),
-                            Positioned(
-                              right: 1,
-                              child: SizedBox(
-                                  child: Icon(
-                                Icons.gps_fixed,
-                                size: 12,
-                                color: Colors.lightGreenAccent,
-                              )),
-                            )
-                          ]),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     ElevatedButton(
+                    //       onPressed: moveToChildren,
+                    //       child: Stack(children: [
+                    //         Icon(Icons.child_care),
+                    //         Positioned(
+                    //           right: 1,
+                    //           child: SizedBox(
+                    //               child: Icon(
+                    //             Icons.gps_fixed,
+                    //             size: 12,
+                    //             color: Colors.lightGreenAccent,
+                    //           )),
+                    //         )
+                    //       ]),
+                    //     ),
+                    //     const SizedBox(
+                    //       width: 10,
+                    //     ),
+                    //   ],
+                    // ),
                     Row(
                       children: [
                         ElevatedButton(
                           onPressed: moveToLocation,
-                          child: Icon(Icons.gps_fixed),
+                          style: ElevatedButton.styleFrom(
+                            fixedSize: const Size(60, 60), // Increase the button size by adjusting the width and height
+                            padding: const EdgeInsets.all(20), // Increase the button size by adjusting the padding
+                          ),
+                          child: const Icon(Icons.gps_fixed),
                         ),
                         const SizedBox(
                           width: 10,
                         ),
                         ElevatedButton(
                           onPressed: plotJourney,
-                          child: Icon(Icons.route),
+                          style: ElevatedButton.styleFrom(
+                            fixedSize: const Size(60, 60), // Increase the button size by adjusting the width and height
+                            padding: const EdgeInsets.all(20), // Increase the button size by adjusting the padding
+                          ),
+                          child: const Icon(Icons.route),
                         ),
                       ],
                     ),

@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocode/geocode.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -17,6 +18,11 @@ import '../../widget_builder.dart';
 import 'location_service.dart';
 import 'maps.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:ui' as ui;
+import 'dart:ui';
+
+import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:math';
 
 class MapViewChildren extends StatefulWidget {
   final String startDestination;
@@ -84,9 +90,23 @@ class _MapViewChildrenState extends State<MapViewChildren> {
     });
 
     super.initState();
-    getLocation();
+
     timer =
         Timer.periodic(const Duration(seconds: 60), (Timer t) => getLocation());
+
+
+  }
+
+  void initialPositions() async{
+    // await moveToLocation();
+    await getLocation();
+    GoogleMapController controller = await _controller.future;
+    CameraPosition newPosition = CameraPosition(
+        zoom: await controller.getZoomLevel(),
+        target:
+        LatLng(startPosition!.latitude!, startPosition!.longitude!));
+    controller.animateCamera(CameraUpdate.newCameraPosition(newPosition));
+    plotJourney();
   }
 
   @override
@@ -164,12 +184,18 @@ class _MapViewChildrenState extends State<MapViewChildren> {
     }
   }
 
-  void _setMarker(LatLng point, String markerID) {
+  void _setMarker(LatLng point, String markerID) async{
+    var icon = BitmapDescriptor.defaultMarker;
+    if(markerID == "endlocation") {
+      icon = await BitmapDescriptorHelper.getBitmapDescriptorFromSvgAsset(
+          "assets/images/destination.svg");
+    }
     setState(() {
       _markers.add(
         Marker(
           markerId: MarkerId(markerID),
           position: point,
+          icon: icon,
           onTap: () {
             showCustomMarkerDialog(point);
           },
@@ -196,21 +222,21 @@ class _MapViewChildrenState extends State<MapViewChildren> {
     );
   }
 
-  Future<void> showStreetView(String lat, String lng) async {
+  Future<void> showStreetView(double? lat, double? lng) async {
     GoogleMapController controller = await _controller.future;
     CameraPosition newPosition = CameraPosition(
       zoom: await controller.getZoomLevel(),
       target: LatLng(
-        double.parse(lat),
-        double.parse(lng),
+        lat??37.42796133580664,
+        lng??-122.085749655962,
       ),
     );
     await controller.animateCamera(
       CameraUpdate.newCameraPosition(newPosition),
     );
     StreetViewer.showStreetView(
-      lat,
-      lng,
+      lat.toString(),
+      lng.toString(),
       "139.26709247816694",
       "8.931085777681233",
     );
@@ -224,8 +250,8 @@ class _MapViewChildrenState extends State<MapViewChildren> {
           content: ElevatedButton(
             onPressed: () {
               showStreetView(
-                positon.latitude.toString(),
-                positon.longitude.toString(),
+                positon.latitude,
+                positon.longitude,
               );
               Navigator.of(context).pop();
             },
@@ -271,6 +297,33 @@ class _MapViewChildrenState extends State<MapViewChildren> {
             ),
           ],
         ),
+        Row(
+          children: [
+            Expanded(flex: 2, child: ElevatedButton(
+              onPressed: (){
+                showStreetView(currentLocation!.latitude, currentLocation!.longitude);
+                },
+              child: const Text("Street View", style: TextStyle(color: Colors.red, fontSize: 20),),
+            ),
+
+          ),
+            const SizedBox(
+              width: 10,
+            ),
+          Expanded(child: ElevatedButton(
+            onPressed: moveToLocation,
+            child: Icon(Icons.gps_fixed),
+          ))
+          ,
+          const SizedBox(
+            width: 10,
+          ),
+          Expanded(flex: 2, child: ElevatedButton(
+            onPressed: renderAr,
+            child: const Text("Start AR", style: TextStyle(color: Colors.red, fontSize: 20),),
+          ))
+          ,
+        ],),
         Expanded(
           child: Stack(
             children: [
@@ -279,42 +332,12 @@ class _MapViewChildrenState extends State<MapViewChildren> {
                 markers: _markers,
                 polygons: _polygons,
                 polylines: _polylines,
-                myLocationEnabled: true,
+                // myLocationEnabled: true,
                 initialCameraPosition: _kGooglePlex,
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
+                  initialPositions();
                 },
-              ),
-              Positioned(
-                bottom: 10,
-                right: 60,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: moveToLocation,
-                          child: Icon(Icons.gps_fixed),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        ElevatedButton(
-                          onPressed: plotJourney,
-                          child: Icon(Icons.route),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: renderAr,
-                          child: const Text("AR"),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -415,5 +438,38 @@ class _MapViewChildrenState extends State<MapViewChildren> {
     _setMarker(startPosition, "startlocation");
     _setMarker(endPosition, "endlocation");
     showDistanceNotification(endPosition);
+  }
+
+}
+
+class BitmapDescriptorHelper {
+
+  static Future<BitmapDescriptor> getBitmapDescriptorFromSvgAsset(
+      String assetName, [
+        Size size = const Size(48, 48),
+      ]) async {
+    final pictureInfo = await vg.loadPicture(SvgAssetLoader(assetName), null);
+
+    double devicePixelRatio = ui.window.devicePixelRatio;
+    int width = (size.width * devicePixelRatio).toInt();
+    int height = (size.height * devicePixelRatio).toInt();
+
+    final scaleFactor = min(
+      width / pictureInfo.size.width,
+      height / pictureInfo.size.height,
+    );
+
+    final recorder = ui.PictureRecorder();
+
+    ui.Canvas(recorder)
+      ..scale(scaleFactor)
+      ..drawPicture(pictureInfo.picture);
+
+    final rasterPicture = recorder.endRecording();
+
+    final image = rasterPicture.toImageSync(width, height);
+    final bytes = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+
+    return BitmapDescriptor.fromBytes(bytes.buffer.asUint8List());
   }
 }

@@ -10,6 +10,7 @@ Widget createInput(
   String hintText, {
   TextEditingController? controller,
   void Function(String)? onChanged,
+  void Function()? onEditingComplete,
   String? Function(String?)? validator,
   bool hide = false,
   Color? color,
@@ -27,6 +28,7 @@ Widget createInput(
       controller: controller,
       onChanged: onChanged,
       validator: validator,
+      onEditingComplete: onEditingComplete,
     ),
   );
 }

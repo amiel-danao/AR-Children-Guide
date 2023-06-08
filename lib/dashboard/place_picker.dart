@@ -177,7 +177,9 @@ class _PlacePickerState extends State<PlacePicker> {
           )
         ],
       ),
+        floatingActionButtonLocation:FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: FloatingActionButton(
+
         backgroundColor: Color.fromRGBO(62, 154, 171, 1),
         onPressed: () {
           goToPlace(isLocation: true);

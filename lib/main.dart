@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:ar/dashboard/admin_dashboard.dart';
+import 'package:ar/dashboard/child_journeys_view.dart';
 import 'package:ar/dashboard/pages/admin_create.dart';
 import 'package:ar/dashboard/pages/admin_manage.dart';
 import 'package:ar/dashboard/pages/child_management_admin.dart';
@@ -14,11 +15,12 @@ import 'package:ar/dashboard/profile/child_profile.dart';
 import 'package:ar/dashboard/profile/edit/child_profile_edit.dart';
 import 'package:ar/dashboard/profile/parent_profile.dart';
 import 'package:ar/dashboard/profile/edit/parent_profile_edit.dart';
+import 'package:ar/index.dart';
+import 'package:ar/pages/child_dashboard/child_dashboard_widget.dart';
 import 'package:ar/pre_dashboard.dart';
 import 'package:ar/splash_screen.dart';
 import 'package:ar/widget_builder.dart';
 import 'package:camera/camera.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -27,14 +29,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/auth.dart';
 import 'auth/login_admin.dart';
-import 'auth/login_child.dart';
-import 'auth/login_parent.dart';
 import 'auth/signup_parent.dart';
-import 'dashboard/child_dashboard.dart';
 import 'dashboard/maps/notification.dart';
 import 'dashboard/pages/child_create_form.dart';
 import 'dashboard/pages/child_management.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+
+import 'instructions/instructions_widget.dart';
+import 'login_child/login_child_widget.dart';
+import 'login_parent/login_parent_widget.dart';
 
 late List<CameraDescription> cameras;
 
@@ -119,17 +122,6 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 void onStart(ServiceInstance service) async {
   // Only available for flutter 3.0.0 and later
   DartPluginRegistrant.ensureInitialized();
-
-  // For flutter prior to version 3.0.0
-  // We have to register the plugin manually
-
-  // SharedPreferences preferences = await SharedPreferences.getInstance();
-  // await preferences.setString("hello", "world");
-
-  /// OPTIONAL when use custom notification
-  // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  // FlutterLocalNotificationsPlugin();
-
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) {
       service.setAsForegroundService();
@@ -150,61 +142,6 @@ void onStart(ServiceInstance service) async {
 
   FirebaseMessaging.onMessage.listen(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // bring to foreground
-  // Timer.periodic(const Duration(seconds: 1), (timer) async {
-    // if (service is AndroidServiceInstance) {
-      // if (await service.isForegroundService()) {
-        /// OPTIONAL for use custom notification
-        /// the notification id must be equals with AndroidConfiguration when you call configure() method.
-        // flutterLocalNotificationsPlugin.show(
-        //   888,
-        //   'COOL SERVICE',
-        //   'Awesome ${DateTime.now()}',
-        //   const NotificationDetails(
-        //     android: AndroidNotificationDetails(
-        //       'my_foreground',
-        //       'MY FOREGROUND SERVICE',
-        //       icon: 'ic_bg_service_small',
-        //       ongoing: true,
-        //     ),
-        //   ),
-        // );
-
-        // if you don't using custom notification, uncomment this
-        // service.setForegroundNotificationInfo(
-        //   title: "My App Service",
-        //   content: "Updated at ${DateTime.now()}",
-        // );
-      // }
-    // }
-
-    /// you can see this log in logcat
-    // print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
-
-    // test using external plugin
-    // final deviceInfo = DeviceInfoPlugin();
-    // String? device;
-    // if (Platform.isAndroid) {
-    //   final androidInfo = await deviceInfo.androidInfo;
-    //   device = androidInfo.model;
-    // }
-    //
-    // if (Platform.isIOS) {
-    //   final iosInfo = await deviceInfo.iosInfo;
-    //   device = iosInfo.model;
-    // }
-    //
-    // service.invoke(
-    //   'update',
-    //   {
-    //     "current_date": DateTime.now().toIso8601String(),
-    //     "device": device,
-    //   },
-    // );
-  // });
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -242,6 +179,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: Color.fromRGBO(62, 154, 171, 1),
@@ -252,8 +190,8 @@ class MyApp extends StatelessWidget {
         "/": (context) => SplashScreen(),
         "/home": (context) => const SessionChecker(),
         "/login_admin": (context) => const AdminLoginPage(),
-        "/login_parent": (context) => const ParentLoginPage(),
-        "/login_child": (context) => const ChildLoginPage(),
+        "/login_parent": (context) => const LoginParentWidget(),
+        "/login_child": (context) => const LoginChildWidget(),
         "/signup_parent": (context) => const ParentSignUpPage(),
         "/dashboard_admin": (context) => const AdminDashboard(),
         "/dashboard_parent": (context) => const ParentDashboardPage(),
@@ -273,6 +211,8 @@ class MyApp extends StatelessWidget {
             const ParentProfileEdit(),
         "/dashboard/profile_child": (context) => const ChildProfile(),
         "/dashboard/profile_child/edit": (context) => const ChildProfileEdit(),
+        "/child_journey_view": (context) => const ChildJourneysView(),
+        "/instructions_view": (context) => const InstructionsWidget()
       },
     );
   }
@@ -294,7 +234,7 @@ class _SessionCheckerState extends State<SessionChecker> {
         if (snapshot.hasData) {
           return const PreDashboard();
         } else {
-          return const AdminLoginPage();
+          return const LoginChooserWidget();
         }
       },
     );
